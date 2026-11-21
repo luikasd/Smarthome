@@ -1,0 +1,2161 @@
+views:
+  - title: Raumplan
+    path: raumplan
+    icon: mdi:floor-plan
+    type: panel
+    cards:
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: heading
+                heading: Schnellzugriff
+                icon: mdi:gesture-tap
+                heading_style: title
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  - type: tile
+                    entity: input_boolean.kinder_sind_da
+                    name: Kinder sind da
+                    icon: mdi:account-child
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_boolean.bett
+                    name: Bett
+                    icon: mdi:bed
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: script.alles_aus
+                    name: Alles aus
+                    icon: mdi:power
+                    tap_action:
+                      action: perform-action
+                      perform_action: script.turn_on
+                      target:
+                        entity_id: script.alles_aus
+                    icon_tap_action:
+                      action: perform-action
+                      perform_action: script.turn_on
+                      target:
+                        entity_id: script.alles_aus
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                    hide_state: true
+                  - type: tile
+                    entity: script.ich_bin_wach
+                    name: Ich bin wach
+                    tap_action:
+                      action: perform-action
+                      perform_action: script.turn_on
+                      target:
+                        entity_id: script.ich_bin_wach
+                    icon_tap_action:
+                      action: perform-action
+                      perform_action: script.turn_on
+                      target:
+                        entity_id: script.ich_bin_wach
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                    hide_state: true
+                  - type: tile
+                    entity: light.morgenroutine
+                    name: Morgenroutine
+                    icon: mdi:weather-sunset-up
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: sensor.fernseher_status
+                    name: Fernseher
+                    icon: mdi:television
+                    tap_action:
+                      action: perform-action
+                      perform_action: switch.toggle
+                      target:
+                        entity_id: switch.fernseher_kombiniert
+                    icon_tap_action:
+                      action: perform-action
+                      perform_action: switch.toggle
+                      target:
+                        entity_id: switch.fernseher_kombiniert
+                    hold_action:
+                      action: more-info
+                      entity: media_player.wohnzimmer_tv
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: switch.pc
+                    name: PC
+                    tap_action:
+                      action: more-info
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: media_player.spotify_lukas_pabst
+                    name: Spotify
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_boolean.kinomodus
+                    name: Kinomodus
+                    icon: mdi:movie-open
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_boolean.kinder_kommen
+                    name: Kinder kommen
+                    icon: mdi:account-child-outline
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    vertical: true
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+              - type: tile
+                entity: binary_sensor.heizung_jemand_da
+                name: Heizung
+                icon: mdi:radiator
+                hide_state: false
+                state_content: []
+                tap_action:
+                  action: navigate
+                  navigation_path: /lovelace/heizung
+                icon_tap_action:
+                  action: navigate
+                  navigation_path: /lovelace/heizung
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; }'
+              - type: heading
+                heading: Morgen
+                icon: mdi:weather-sunset-up
+                heading_style: title
+              - type: tile
+                entity: input_select.morgenmusik
+                name: Morgenmusik
+                features:
+                  - type: select-options
+                features_position: bottom
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; }'
+              - type: tile
+                entity: input_text.morgenmusik_spotify_link
+                name: Eigener Spotify-Link
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; }'
+                hide_state: true
+          - type: picture-elements
+            image: media-source://image_upload/3a5a5994c13c1e7594e875a300c9637a
+            elements:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.schlafzimmer
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/383189b0e840d1be48ae43b3e8a8bb62
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.wohnzimmer
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/1906c80102c5f5cede253bb30a8b7e6a
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.kuche
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/cccd867d6b61a899b6b926c36b0847e7
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.badezimmer
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/08f186be74e8269bfe98caab739c6995
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.flur
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/118c73018c44f3abd8a8b025d35b0176
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: light.kinderzimmer
+                    state: 'on'
+                elements:
+                  - type: image
+                    image:
+                      media_content_id: media-source://image_upload/b9556ff2e22f540e5df5efe27157e3d1
+                      media_content_type: image/png
+                    style:
+                      left: 50%
+                      top: 50%
+                      width: 100%
+                      pointer-events: none
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.saugroboter_unterwegs
+                    state: 'on'
+                elements:
+                  - type: icon
+                    icon: mdi:robot-vacuum
+                    title: Deed (live)
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 50%
+                      top: 50%
+                      transform: translate(-50%,-50%)
+                      color: '#fff'
+                      background: rgba(67,160,71,0.9)
+                      border-radius: 50%
+                      padding: 3px
+                      --mdc-icon-size: clamp(12px, 1.3vw, 18px)
+                      box-shadow: >-
+                        0 0 0 3px rgba(67,160,71,0.35), 0 2px 6px
+                        rgba(0,0,0,0.4)
+                      pointer-events: none
+                      transition: left 4s linear, top 4s linear
+                    card_mod:
+                      style: >-
+                        :host { left: {{
+                        states('input_number.saugroboter_position_x') }}%
+                        !important; top: {{
+                        states('input_number.saugroboter_position_y') }}%
+                        !important; }
+              - type: image
+                entity: light.schlafzimmer
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 72%
+                  top: 19.6%
+                  width: 51.9%
+                  height: 34.3%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.schlafzimmer
+                hold_action:
+                  action: more-info
+                  entity: light.schlafzimmer
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.turn_on
+                  target:
+                    entity_id: light.schlafzimmer
+                  data:
+                    color_temp_kelvin: 3012
+                    brightness_pct: 100
+                    transition: 2
+                aspect_ratio: 408:237
+              - type: image
+                entity: light.wohnzimmer
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 72.1%
+                  top: 59.1%
+                  width: 51.8%
+                  height: 42.2%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.wohnzimmer
+                hold_action:
+                  action: more-info
+                  entity: light.wohnzimmer
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.turn_on
+                  target:
+                    entity_id: light.wohnzimmer
+                  data:
+                    color_temp_kelvin: 3475
+                    brightness_pct: 100
+                    transition: 1
+                aspect_ratio: 407:292
+              - type: image
+                entity: light.kuche
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 17.8%
+                  top: 59.2%
+                  width: 31.3%
+                  height: 29.6%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.kuche
+                hold_action:
+                  action: more-info
+                  entity: light.kuche
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.turn_on
+                  target:
+                    entity_id: light.kuche
+                  data:
+                    color_temp_kelvin: 3475
+                    brightness_pct: 100
+                    transition: 1
+                aspect_ratio: 246:205
+              - type: image
+                entity: light.badezimmer
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 17.7%
+                  top: 86.3%
+                  width: 31%
+                  height: 23.1%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.badezimmer
+                hold_action:
+                  action: more-info
+                  entity: light.badezimmer
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.turn_on
+                  target:
+                    entity_id: light.badezimmer
+                  data:
+                    color_temp_kelvin: 3475
+                    brightness_pct: 100
+                    transition: 1
+                aspect_ratio: 244:160
+              - type: image
+                entity: light.flur
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 39.9%
+                  top: 70.9%
+                  width: 12.7%
+                  height: 54.2%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.flur
+                hold_action:
+                  action: more-info
+                  entity: light.flur
+                aspect_ratio: 100:375
+              - type: image
+                entity: light.kinderzimmer
+                image:
+                  media_content_id: media-source://image_upload/a1fdb1a93ceae69ce62d6ec4e08f6f6f
+                  media_content_type: image/png
+                style:
+                  left: 23.9%
+                  top: 23.1%
+                  width: 43.9%
+                  height: 40.9%
+                  opacity: 0
+                tap_action:
+                  action: perform-action
+                  perform_action: script.raumlicht_umschalten
+                  data:
+                    licht: light.kinderzimmer
+                hold_action:
+                  action: more-info
+                  entity: light.kinderzimmer
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.turn_on
+                  target:
+                    entity_id: light.kinderzimmer
+                  data:
+                    color_temp_kelvin: 3475
+                    brightness_pct: 100
+                    transition: 1
+                aspect_ratio: 345:283
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_kinderzimmer
+                    state_not:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: state-label
+                    entity: sensor.raumtemperatur_kinderzimmer
+                    style:
+                      left: 8%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.72)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.28)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_kinderzimmer
+                    hold_action:
+                      action: more-info
+                      entity: climate.heizung_kinderzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_kinderzimmer
+                    state:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: icon
+                    icon: mdi:radiator-off
+                    title: Heizung nicht erreichbar (lädt?)
+                    style:
+                      left: 8%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.55)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_kinderzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.luftungsempfehlung_kinderzimmer
+                    state: 'on'
+                elements:
+                  - type: state-label
+                    entity: sensor.luften_hinweis
+                    prefix: '🪟 '
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 26%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(30,136,229,0.92)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.5)
+                      border-radius: 999px
+                      padding: 3px 10px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4)
+                      pointer-events: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_kuche
+                    state_not:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: state-label
+                    entity: sensor.raumtemperatur_kuche
+                    style:
+                      left: 8%
+                      top: 59.4%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.72)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.28)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_kuche
+                    hold_action:
+                      action: more-info
+                      entity: climate.heizung_kuche
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_kuche
+                    state:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: icon
+                    icon: mdi:radiator-off
+                    title: Heizung nicht erreichbar (lädt?)
+                    style:
+                      left: 8%
+                      top: 59.4%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.55)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_kuche
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.luftungsempfehlung_kuche
+                    state: 'on'
+                elements:
+                  - type: state-label
+                    entity: sensor.luften_hinweis
+                    prefix: '🪟 '
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 24.5%
+                      top: 59.4%
+                      transform: translate(-50%,-50%)
+                      background: rgba(30,136,229,0.92)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.5)
+                      border-radius: 999px
+                      padding: 3px 10px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4)
+                      pointer-events: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_bad
+                    state_not:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: state-label
+                    entity: sensor.raumtemperatur_bad
+                    style:
+                      left: 18.7%
+                      top: 93%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.72)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.28)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_bad
+                    hold_action:
+                      action: more-info
+                      entity: climate.heizung_bad
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_bad
+                    state:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: icon
+                    icon: mdi:radiator-off
+                    title: Heizung nicht erreichbar (lädt?)
+                    style:
+                      left: 18.7%
+                      top: 93%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.55)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_bad
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.luftungsempfehlung_badezimmer
+                    state: 'on'
+                elements:
+                  - type: state-label
+                    entity: sensor.luften_hinweis
+                    prefix: '🪟 '
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 18%
+                      top: 83.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(30,136,229,0.92)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.5)
+                      border-radius: 999px
+                      padding: 3px 10px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4)
+                      pointer-events: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_schlafzimmer
+                    state_not:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: state-label
+                    entity: sensor.raumtemperatur_schlafzimmer
+                    style:
+                      left: 92.5%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.72)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.28)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_schlafzimmer
+                    hold_action:
+                      action: more-info
+                      entity: climate.heizung_schlafzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_schlafzimmer
+                    state:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: icon
+                    icon: mdi:radiator-off
+                    title: Heizung nicht erreichbar (lädt?)
+                    style:
+                      left: 92.5%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.55)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_schlafzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.luftungsempfehlung_schlafzimmer
+                    state: 'on'
+                elements:
+                  - type: state-label
+                    entity: sensor.luften_hinweis
+                    prefix: '🪟 '
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 69%
+                      top: 26.9%
+                      transform: translate(-50%,-50%)
+                      background: rgba(30,136,229,0.92)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.5)
+                      border-radius: 999px
+                      padding: 3px 10px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4)
+                      pointer-events: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_wohnzimmer
+                    state_not:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: state-label
+                    entity: sensor.raumtemperatur_wohnzimmer
+                    style:
+                      left: 92.5%
+                      top: 65.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.72)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.28)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_wohnzimmer
+                    hold_action:
+                      action: more-info
+                      entity: climate.heizung_wohnzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: climate.heizung_wohnzimmer
+                    state:
+                      - unavailable
+                      - unknown
+                elements:
+                  - type: icon
+                    icon: mdi:radiator-off
+                    title: Heizung nicht erreichbar (lädt?)
+                    style:
+                      left: 92.5%
+                      top: 65.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.55)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: more-info
+                      entity: climate.heizung_wohnzimmer
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.luftungsempfehlung_wohnzimmer
+                    state: 'on'
+                elements:
+                  - type: state-label
+                    entity: sensor.luften_hinweis
+                    prefix: '🪟 '
+                    tap_action:
+                      action: none
+                    hold_action:
+                      action: none
+                    style:
+                      left: 69%
+                      top: 65.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(30,136,229,0.92)
+                      color: '#fff'
+                      border: 1px solid rgba(255,255,255,0.5)
+                      border-radius: 999px
+                      padding: 3px 10px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4)
+                      pointer-events: none
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: sensor.fernseher_status
+                    state_not: Aus
+                elements:
+                  - type: state-label
+                    entity: sensor.fernseher_status
+                    prefix: '📺 '
+                    style:
+                      left: 83%
+                      top: 75%
+                      transform: translate(-50%,-50%)
+                      background: rgba(255,167,38,0.92)
+                      color: '#111'
+                      border: 1px solid rgba(255,255,255,0.6)
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(10px, 1.1vw, 13px)
+                      font-weight: '600'
+                      line-height: '1.45'
+                      white-space: nowrap
+                      backdrop-filter: blur(6px)
+                      -webkit-backdrop-filter: blur(6px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      max-width: 40%
+                      overflow: hidden
+                      text-overflow: ellipsis
+                    tap_action:
+                      action: perform-action
+                      perform_action: switch.toggle
+                      target:
+                        entity_id: switch.fernseher_kombiniert
+                    hold_action:
+                      action: more-info
+                      entity: media_player.wohnzimmer_tv
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: sensor.fernseher_status
+                    state: Aus
+                elements:
+                  - type: icon
+                    icon: mdi:television
+                    title: Fernseher aus – tippen zum Einschalten
+                    style:
+                      left: 83%
+                      top: 75%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.7)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: perform-action
+                      perform_action: switch.toggle
+                      target:
+                        entity_id: switch.fernseher_kombiniert
+                    hold_action:
+                      action: more-info
+                      entity: media_player.wohnzimmer_tv
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: switch.pc
+                    state: 'on'
+                elements:
+                  - type: icon
+                    icon: mdi:desktop-tower-monitor
+                    entity: switch.pc
+                    title: PC an
+                    style:
+                      left: 82.2%
+                      top: 33%
+                      transform: translate(-50%,-50%)
+                      background: rgba(67,160,71,0.95)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+                      entity: switch.pc
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: switch.pc
+                    state_not: 'on'
+                elements:
+                  - type: icon
+                    icon: mdi:desktop-tower-monitor
+                    entity: switch.pc
+                    title: PC aus
+                    style:
+                      left: 82.2%
+                      top: 33%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.7)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: toggle
+                    hold_action:
+                      action: more-info
+                      entity: switch.pc
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: lock.wohnungstur
+                    state: locked
+                elements:
+                  - type: icon
+                    icon: mdi:lock
+                    entity: lock.wohnungstur
+                    title: Wohnungstür abgeschlossen
+                    style:
+                      left: 39.9%
+                      top: 96.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(67,160,71,0.95)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 2px
+                      --mdc-icon-size: clamp(12px, 1.2vw, 16px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                      line-height: '0'
+                    tap_action:
+                      action: toggle
+                      confirmation:
+                        text: Wohnungstür ab- bzw. aufschließen?
+                    hold_action:
+                      action: more-info
+                      entity: lock.wohnungstur
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: lock.wohnungstur
+                    state: unlocked
+                elements:
+                  - type: icon
+                    icon: mdi:lock-open-variant
+                    entity: lock.wohnungstur
+                    title: Wohnungstür offen
+                    style:
+                      left: 39.9%
+                      top: 96.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(251,140,0,0.95)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 2px
+                      --mdc-icon-size: clamp(12px, 1.2vw, 16px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                      line-height: '0'
+                    tap_action:
+                      action: toggle
+                      confirmation:
+                        text: Wohnungstür ab- bzw. aufschließen?
+                    hold_action:
+                      action: more-info
+                      entity: lock.wohnungstur
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: lock.wohnungstur
+                    state_not:
+                      - locked
+                      - unlocked
+                elements:
+                  - type: icon
+                    icon: mdi:lock-alert
+                    entity: lock.wohnungstur
+                    title: 'Wohnungstür: Status unklar'
+                    style:
+                      left: 39.9%
+                      top: 96.5%
+                      transform: translate(-50%,-50%)
+                      background: rgba(229,57,53,0.95)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 2px
+                      --mdc-icon-size: clamp(12px, 1.2vw, 16px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                      line-height: '0'
+                    tap_action:
+                      action: more-info
+                      entity: lock.wohnungstur
+              - type: state-label
+                entity: script.haustur_offnen
+                prefix: '🚪 '
+                style:
+                  left: 64%
+                  top: 90%
+                  transform: translate(-50%,-50%)
+                  background: rgba(17,17,17,0.78)
+                  color: '#fff'
+                  border: 1px solid rgba(255,255,255,0.28)
+                  border-radius: 999px
+                  padding: 4px 10px
+                  font-weight: '600'
+                  line-height: '1.45'
+                  white-space: nowrap
+                  backdrop-filter: blur(6px)
+                  -webkit-backdrop-filter: blur(6px)
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                  font-size: clamp(10px, 1.1vw, 13px)
+                tap_action:
+                  action: perform-action
+                  perform_action: script.turn_on
+                  target:
+                    entity_id: script.haustur_offnen
+                  confirmation:
+                    text: Haustür unten öffnen (Summer)?
+                hold_action:
+                  action: more-info
+                  entity: lock.relay_hausdor
+                attribute: friendly_name
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: vacuum.kuche_deed
+                    state: cleaning
+                elements:
+                  - type: icon
+                    icon: mdi:robot-vacuum
+                    entity: vacuum.kuche_deed
+                    title: >-
+                      Saugt – tippen: Pause, halten: Einstellungen · doppelt:
+                      zur Station
+                    style:
+                      left: 18%
+                      top: 48%
+                      transform: translate(-50%,-50%)
+                      background: rgba(67,160,71,0.95)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: perform-action
+                      perform_action: vacuum.pause
+                      target:
+                        entity_id: vacuum.kuche_deed
+                    hold_action:
+                      action: navigate
+                      navigation_path: /lovelace/saugroboter
+                    double_tap_action:
+                      action: perform-action
+                      perform_action: vacuum.return_to_base
+                      target:
+                        entity_id: vacuum.kuche_deed
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: vacuum.kuche_deed
+                    state: error
+                elements:
+                  - type: state-label
+                    entity: sensor.saugroboter_status
+                    tap_action:
+                      action: navigate
+                      navigation_path: /lovelace/saugroboter
+                    hold_action:
+                      action: navigate
+                      navigation_path: /lovelace/saugroboter
+                    style:
+                      left: 18%
+                      top: 48%
+                      transform: translate(-50%,-50%)
+                      background: rgba(229,57,53,0.92)
+                      color: '#fff'
+                      border-radius: 999px
+                      padding: 2px 8px
+                      font-size: clamp(9px, 1vw, 12px)
+                      font-weight: '600'
+                      white-space: nowrap
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                    prefix: '🤖 '
+                    double_tap_action:
+                      action: perform-action
+                      perform_action: vacuum.return_to_base
+                      target:
+                        entity_id: vacuum.kuche_deed
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: vacuum.kuche_deed
+                    state_not:
+                      - cleaning
+                      - error
+                elements:
+                  - type: icon
+                    icon: mdi:robot-vacuum
+                    entity: vacuum.kuche_deed
+                    title: >-
+                      Saugroboter – tippen: starten, halten: Räume wählen ·
+                      doppelt: zur Station
+                    style:
+                      left: 18%
+                      top: 48%
+                      transform: translate(-50%,-50%)
+                      background: rgba(17,17,17,0.6)
+                      color: rgba(255,255,255,0.8)
+                      border-radius: 999px
+                      padding: 4px
+                      --mdc-icon-size: clamp(14px, 1.5vw, 20px)
+                      box-shadow: 0 2px 6px rgba(0,0,0,0.35)
+                      border: 1px solid rgba(255,255,255,0.25)
+                    tap_action:
+                      action: perform-action
+                      perform_action: vacuum.start
+                      target:
+                        entity_id: vacuum.kuche_deed
+                      confirmation:
+                        text: Ganze Wohnung saugen?
+                    hold_action:
+                      action: navigate
+                      navigation_path: /lovelace/saugroboter
+                    double_tap_action:
+                      action: perform-action
+                      perform_action: vacuum.return_to_base
+                      target:
+                        entity_id: vacuum.kuche_deed
+            card_mod:
+              style:
+                .: >-
+                  ha-card { border-radius: 20px; overflow: hidden; background:
+                  rgba(255,255,255,0.03); box-shadow: 0 6px 24px
+                  rgba(0,0,0,0.35); }
+                hui-state-label-element $: >-
+                  div { padding: 0 !important; }
+
+                  @media (max-width: 640px) { :host { font-size: 9px !important;
+                  padding: 2px 6px !important; } }
+          - type: vertical-stack
+            cards:
+              - type: heading
+                heading: Kamera Flur
+                icon: mdi:cctv
+                heading_style: title
+                badges:
+                  - type: entity
+                    entity: light.flur_flur_cam_blitz
+                    show_icon: true
+                    show_state: true
+                    tap_action:
+                      action: toggle
+              - type: picture-entity
+                entity: camera.flur_flur_cam_kamera
+                camera_view: live
+                show_name: false
+                show_state: false
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; overflow: hidden; }'
+                double_tap_action:
+                  action: perform-action
+                  perform_action: light.toggle
+                  target:
+                    entity_id: light.flur_flur_cam_blitz
+                hold_action:
+                  action: more-info
+                  entity: light.flur_flur_cam_blitz
+              - type: heading
+                heading: Heute
+                icon: mdi:calendar-check
+                heading_style: title
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  - type: tile
+                    entity: input_boolean.fokus_modus
+                    name: Fokus
+                    icon: mdi:target
+                    tap_action:
+                      action: toggle
+                    icon_tap_action:
+                      action: toggle
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: timer.fokus_arbeitsblock
+                    name: Fokus-Block
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_datetime.medikamente_morgens_genommen
+                    name: Medikamente
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_datetime.supplements_fruhstuck_genommen
+                    name: Supplements
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: input_datetime.magnesium_abends_genommen
+                    name: Magnesium
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: counter.laufen_diese_woche
+                    name: Laufen (Woche)
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+              - type: heading
+                heading: Draußen
+                icon: mdi:weather-partly-cloudy
+                heading_style: title
+              - type: grid
+                columns: 2
+                square: false
+                cards:
+                  - type: tile
+                    entity: weather.forecast_home
+                    name: Wetter
+                    state_content:
+                      - state
+                      - temperature
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+                  - type: tile
+                    entity: sensor.aussenmeter_temperatur
+                    name: Außen
+                    card_mod:
+                      style: 'ha-card { border-radius: 14px; }'
+              - type: heading
+                heading: Hinweise
+                icon: mdi:information-outline
+                heading_style: title
+              - type: tile
+                entity: input_text.aufenthaltsraum
+                name: Zuletzt Bewegung in
+                icon: mdi:map-marker-account
+                state_content: state
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; }'
+              - type: markdown
+                content: >-
+                  {%- set ns = namespace(l=[], b=[], names=[]) -%}
+
+                  {%- set rooms =
+                  {'badezimmer':'Bad','kinderzimmer':'Kinderzimmer','schlafzimmer':'Schlafzimmer','kuche':'Küche','wohnzimmer':'Wohnzimmer'}
+                  -%}
+
+                  {%- for k, n in rooms.items() if
+                  is_state('binary_sensor.luftungsempfehlung_' ~ k, 'on') -%}{%-
+                  set ns.l = ns.l + [n] -%}{%- endfor -%}
+
+                  {%- set mob = integration_entities('mobile_app') -%}
+
+                  {%- for s in states.sensor |
+                  selectattr('attributes.device_class','defined') |
+                  selectattr('attributes.device_class','eq','battery') |
+                  sort(attribute='state') if s.entity_id not in mob and s.state
+                  | is_number and s.state | float <= 30 -%}
+
+                  {%- set n = s.name | replace(' Batterie','') -%}{%- set
+                  ns.names = ns.names + [n] -%}{%- set ns.b = ns.b + ['**' ~ n ~
+                  '** – ' ~ (s.state | float | round(0) | int) ~ ' %'] -%}
+
+                  {%- endfor -%}
+
+                  {%- for s in states.binary_sensor |
+                  selectattr('attributes.device_class','defined') |
+                  selectattr('attributes.device_class','eq','battery') |
+                  selectattr('state','eq','on') if s.entity_id not in mob -%}
+
+                  {%- set n = s.name | replace(' Batteriestand','') -%}{%- if n
+                  not in ns.names -%}{%- set ns.b = ns.b + ['**' ~ n ~ '** –
+                  niedrig'] -%}{%- endif -%}
+
+                  {%- endfor -%}
+
+                  <ha-icon icon="mdi:window-open-variant"></ha-icon> **Lüften:**
+                  {{ ns.l | join(', ') if ns.l else 'gerade nicht nötig ✓' }}
+
+
+                  <ha-icon icon="mdi:battery-alert-variant-outline"></ha-icon>
+                  **Batterien ≤ 30 %:** {% if ns.b %}
+
+                  {% for x in ns.b %}- {{ x }}
+
+                  {% endfor %}{% else %}alle ok ✓{% endif %}
+                card_mod:
+                  style: 'ha-card { border-radius: 14px; }'
+        card_mod:
+          style: |-
+            #root {
+              grid-template-columns: minmax(240px, 1fr) minmax(0, 2.4fr) minmax(240px, 1fr) !important;
+              gap: 20px !important; align-items: start; padding: 16px; box-sizing: border-box; max-width: 1900px; margin: 0 auto;
+            }
+            @media (max-width: 1150px) {
+              #root { grid-template-columns: 1fr 1fr !important; gap: 14px !important; padding: 10px; }
+              #root > :nth-child(2) { order: -1; grid-column: 1 / -1; }
+            }
+            @media (max-width: 640px) {
+              #root { grid-template-columns: 1fr !important; gap: 12px !important; padding: 6px 4px; }
+            }
+  - title: Saugroboter
+    path: saugroboter
+    subview: true
+    back_path: /lovelace/raumplan
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Deed
+            icon: mdi:robot-vacuum
+          - type: tile
+            entity: vacuum.kuche_deed
+            name: Deed
+            features:
+              - type: vacuum-commands
+                commands:
+                  - start_pause
+                  - stop
+                  - return_home
+                  - locate
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: sensor.saugroboter_status
+            name: Status
+            icon: mdi:information-outline
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: sensor.kuche_deed_batterie
+            name: Akku
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: picture-entity
+            entity: image.kuche_deed_karte
+            show_name: false
+            show_state: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: Räume wählen
+            icon: mdi:floor-plan
+          - type: tile
+            entity: input_boolean.saugen_kuche
+            name: Küche
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.saugen_wohnzimmer
+            name: Wohnzimmer
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.saugen_schlafzimmer
+            name: Schlafzimmer
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.saugen_flur
+            name: Flur
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.saugen_bad
+            name: Bad
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.saugen_kinderzimmer
+            name: Kinderzimmer
+            icon: mdi:checkbox-blank-circle-outline
+            tap_action:
+              action: toggle
+            icon_tap_action:
+              action: toggle
+            state_content: name
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: script.saugroboter_raeume
+            name: ▶ Ausgewählte Räume starten
+            hide_state: true
+            tap_action:
+              action: perform-action
+              perform_action: script.turn_on
+              target:
+                entity_id: script.saugroboter_raeume
+            icon_tap_action:
+              action: perform-action
+              perform_action: script.turn_on
+              target:
+                entity_id: script.saugroboter_raeume
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Wie reinigen?
+            icon: mdi:tune
+          - type: tile
+            entity: select.deed_betriebsmodus
+            name: Modus
+            features:
+              - type: select-options
+            features_position: bottom
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: select.kuche_deed_wasserdurchfluss
+            name: Wassermenge
+            features:
+              - type: select-options
+            features_position: bottom
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: number.deed_reinigungszahler
+            name: Durchgänge
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: bottom
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: switch.deed_reinigungspraferenz
+            name: Raum-Einstellungen aus der App
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: heading
+            heading: Verschleiß
+            heading_style: subtitle
+          - type: tile
+            entity: sensor.kuche_deed_lebensdauer_der_hauptburste
+            name: Hauptbürste
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: sensor.kuche_deed_lebensdauer_der_seitenburste
+            name: Seitenbürste
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: sensor.kuche_deed_lebensdauer_des_filters
+            name: Filter
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+  - title: Heizung
+    path: heizung
+    icon: mdi:radiator
+    subview: true
+    back_path: /lovelace/raumplan
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizung
+            icon: mdi:radiator
+          - type: tile
+            entity: input_boolean.heizung_automatik
+            name: Automatik
+            icon: mdi:radiator
+            tap_action:
+              action: toggle
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: binary_sensor.heizung_jemand_da
+            name: Jemand da (1 km)
+            icon: mdi:home-account
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: input_boolean.heizung_raumthermometer
+            name: Raumthermometer nutzen
+            tap_action:
+              action: toggle
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: sensor.heizung_nachster_wecker
+            name: Nächster Wecker (4–10 Uhr)
+            icon: mdi:alarm
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_vorheizen
+                name: Vorheizen vor dem Wecker
+              - entity: input_number.heizung_schnellheizen_ab
+                name: Schnellheizen ab (zu kalt um)
+              - entity: input_number.heizung_abwesend
+                name: Wenn keiner da
+          - type: markdown
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            content: >-
+              **Alexa:** „Alexa, stell die Heizung Bad auf 22 Grad“ – gilt 2
+              Std. bzw. bis zur nächsten Heizzeit.
+
+
+              **Zeiten ändern:** „Heizzeit“ antippen → ⚙️ → Zeitblöcke ziehen.
+
+
+              **Orange Kachel** antippen = sofort zurück zur Automatik.
+
+
+              **Schnellheizen:** Ist ein Raum deutlich zu kalt, steht das Ventil
+              auf 30 °C (voll auf) – bis der Raum fast warm ist.
+
+
+              **Am tado-Ventil oder in der tado-App verstellt?** Überschreibt
+              Home Assistant nach max. 5 Minuten – stell lieber hier oder per
+              Alexa.
+      - type: grid
+        cards:
+          - type: heading
+            heading: Bad
+            icon: mdi:shower
+          - type: tile
+            entity: climate.heizung_bad
+            name: Heizung Bad
+            features:
+              - type: target-temperature
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.smart_radiator_thermostat_x_2
+            name: Ventil (tado)
+            icon: mdi:valve
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: switch.heizbedarf_bad
+            name: Wärmebedarf
+            icon: mdi:fire
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: schedule.heizung_bad
+            name: Heizzeit
+            icon: mdi:calendar-clock
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_bad_komfort
+                name: Wohlfühl
+              - entity: input_number.heizung_bad_absenk
+                name: Absenken
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.heizung_fenster_bad
+                state: 'on'
+            card:
+              type: tile
+              entity: input_boolean.heizung_fenster_bad
+              name: Fenster offen – Heizung pausiert
+              icon: mdi:window-open-variant
+              color: blue
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: timer.heizung_handbetrieb_bad
+                state: active
+            card:
+              type: tile
+              entity: timer.heizung_handbetrieb_bad
+              name: Von Hand eingestellt (antippen = Automatik)
+              icon: mdi:hand-back-right
+              color: orange
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+              tap_action:
+                action: perform-action
+                perform_action: timer.cancel
+                target:
+                  entity_id: timer.heizung_handbetrieb_bad
+      - type: grid
+        cards:
+          - type: heading
+            heading: Küche
+            icon: mdi:countertop
+          - type: tile
+            entity: climate.heizung_kuche
+            name: Heizung Küche
+            features:
+              - type: target-temperature
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.kuche_kuchen_heizung
+            name: Ventil (tado)
+            icon: mdi:valve
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: switch.heizbedarf_kuche
+            name: Wärmebedarf
+            icon: mdi:fire
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: schedule.heizung_kueche
+            name: Heizzeit
+            icon: mdi:calendar-clock
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_kueche_komfort
+                name: Wohlfühl
+              - entity: input_number.heizung_kueche_absenk
+                name: Absenken
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.heizung_fenster_kueche
+                state: 'on'
+            card:
+              type: tile
+              entity: input_boolean.heizung_fenster_kueche
+              name: Fenster offen – Heizung pausiert
+              icon: mdi:window-open-variant
+              color: blue
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: timer.heizung_handbetrieb_kueche
+                state: active
+            card:
+              type: tile
+              entity: timer.heizung_handbetrieb_kueche
+              name: Von Hand eingestellt (antippen = Automatik)
+              icon: mdi:hand-back-right
+              color: orange
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+              tap_action:
+                action: perform-action
+                perform_action: timer.cancel
+                target:
+                  entity_id: timer.heizung_handbetrieb_kueche
+      - type: grid
+        cards:
+          - type: heading
+            heading: Wohnzimmer
+            icon: mdi:sofa
+          - type: tile
+            entity: climate.heizung_wohnzimmer
+            name: Heizung Wohnzimmer
+            features:
+              - type: target-temperature
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.smart_radiator_thermostat_x
+            name: Ventil (tado)
+            icon: mdi:valve
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: switch.heizbedarf_wohnzimmer
+            name: Wärmebedarf
+            icon: mdi:fire
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: schedule.heizung_wohnzimmer
+            name: Heizzeit
+            icon: mdi:calendar-clock
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_wohnzimmer_komfort
+                name: Wohlfühl
+              - entity: input_number.heizung_wohnzimmer_absenk
+                name: Absenken
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.heizung_fenster_wohnzimmer
+                state: 'on'
+            card:
+              type: tile
+              entity: input_boolean.heizung_fenster_wohnzimmer
+              name: Fenster offen – Heizung pausiert
+              icon: mdi:window-open-variant
+              color: blue
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: timer.heizung_handbetrieb_wohnzimmer
+                state: active
+            card:
+              type: tile
+              entity: timer.heizung_handbetrieb_wohnzimmer
+              name: Von Hand eingestellt (antippen = Automatik)
+              icon: mdi:hand-back-right
+              color: orange
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+              tap_action:
+                action: perform-action
+                perform_action: timer.cancel
+                target:
+                  entity_id: timer.heizung_handbetrieb_wohnzimmer
+      - type: grid
+        cards:
+          - type: heading
+            heading: Schlafzimmer
+            icon: mdi:bed
+          - type: tile
+            entity: climate.heizung_schlafzimmer
+            name: Heizung Schlafzimmer
+            features:
+              - type: target-temperature
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.schlafzimmer_schlafzimmer_heizung
+            name: Ventil (tado)
+            icon: mdi:valve
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: switch.heizbedarf_schlafzimmer
+            name: Wärmebedarf
+            icon: mdi:fire
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: schedule.heizung_schlafzimmer
+            name: Heizzeit
+            icon: mdi:calendar-clock
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_schlafzimmer_komfort
+                name: Wohlfühl
+              - entity: input_number.heizung_schlafzimmer_absenk
+                name: Absenken
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.heizung_fenster_schlafzimmer
+                state: 'on'
+            card:
+              type: tile
+              entity: input_boolean.heizung_fenster_schlafzimmer
+              name: Fenster offen – Heizung pausiert
+              icon: mdi:window-open-variant
+              color: blue
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: timer.heizung_handbetrieb_schlafzimmer
+                state: active
+            card:
+              type: tile
+              entity: timer.heizung_handbetrieb_schlafzimmer
+              name: Von Hand eingestellt (antippen = Automatik)
+              icon: mdi:hand-back-right
+              color: orange
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+              tap_action:
+                action: perform-action
+                perform_action: timer.cancel
+                target:
+                  entity_id: timer.heizung_handbetrieb_schlafzimmer
+      - type: grid
+        cards:
+          - type: heading
+            heading: Kinderzimmer
+            icon: mdi:teddy-bear
+          - type: tile
+            entity: input_boolean.kinder_kommen
+            name: Kinder kommen (vorheizen)
+            icon: mdi:account-child-outline
+            tap_action:
+              action: toggle
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.heizung_kinderzimmer
+            name: Heizung Kinderzimmer
+            features:
+              - type: target-temperature
+            features_position: bottom
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: tile
+            entity: climate.smart_radiator_thermostat_x_3
+            name: Ventil (tado)
+            icon: mdi:valve
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: switch.heizbedarf_kinderzimmer
+            name: Wärmebedarf
+            icon: mdi:fire
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 6
+          - type: tile
+            entity: schedule.heizung_kinderzimmer
+            name: Heizzeit (nur wenn Kinder da)
+            icon: mdi:calendar-clock
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            grid_options:
+              columns: 12
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.heizung_kinderzimmer_komfort
+                name: Wohlfühl
+              - entity: input_number.heizung_kinderzimmer_absenk
+                name: Absenken
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.heizung_fenster_kinderzimmer
+                state: 'on'
+            card:
+              type: tile
+              entity: input_boolean.heizung_fenster_kinderzimmer
+              name: Fenster offen – Heizung pausiert
+              icon: mdi:window-open-variant
+              color: blue
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: timer.heizung_handbetrieb_kinderzimmer
+                state: active
+            card:
+              type: tile
+              entity: timer.heizung_handbetrieb_kinderzimmer
+              name: Von Hand eingestellt (antippen = Automatik)
+              icon: mdi:hand-back-right
+              color: orange
+              card_mod:
+                style: 'ha-card { border-radius: 14px; }'
+              tap_action:
+                action: perform-action
+                perform_action: timer.cancel
+                target:
+                  entity_id: timer.heizung_handbetrieb_kinderzimmer
+      - type: grid
+        cards:
+          - type: heading
+            heading: Licht
+            icon: mdi:lightbulb-auto
+          - type: entities
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_number.licht_start_bonus
+                name: Beim Einschalten heller um
+              - entity: input_number.licht_abdimmzeit
+                name: Danach abdimmen über
+          - type: entities
+            title: Von Hand eingeschaltet
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            entities:
+              - entity: input_boolean.licht_manuell_wohnzimmer
+                name: Wohnzimmer
+              - entity: input_boolean.licht_manuell_kueche
+                name: Küche
+              - entity: input_boolean.licht_manuell_bad
+                name: Bad
+              - entity: input_boolean.licht_manuell_schlafzimmer
+                name: Schlafzimmer
+          - type: markdown
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+            content: >-
+              Von Hand eingeschaltete Räume gehen nicht automatisch aus. Bist du
+              10 Min. in einem anderen Raum, werden sie auf ein Licht mit 10 %
+              gedimmt, nach weiteren 20 Min. kommt eine Frage aufs Handy/PC
+              (ohne Antwort: aus).
