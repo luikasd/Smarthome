@@ -1,0 +1,16 @@
+# Einmalig ausführen, direkt nachdem du die 5 neuen „… abwesend“-Helfer angelegt hast.
+# Setzt in jedem Raum „Keiner da“ auf deine bisherige gemeinsame Temperatur
+# („Temperatur wenn keiner da“), damit kein Raum auf dem Minimalwert startet.
+#
+# Entwicklerwerkzeuge → Aktionen → unten „In YAML-Modus wechseln“ →
+# alles hier einfügen → „Aktion ausführen“.
+action: input_number.set_value
+target:
+  entity_id:
+    - input_number.heizung_bad_abwesend
+    - input_number.heizung_kueche_abwesend
+    - input_number.heizung_wohnzimmer_abwesend
+    - input_number.heizung_schlafzimmer_abwesend
+    - input_number.heizung_kinderzimmer_abwesend
+data:
+  value: "{{ states('input_number.heizung_abwesend') | float(16) }}"

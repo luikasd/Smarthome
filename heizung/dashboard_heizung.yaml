@@ -1,0 +1,961 @@
+# Heizung – eigenes Dashboard mit einem Fenster pro Raum
+#
+# Einfügen: Einstellungen → Dashboards → „Dashboard hinzufügen“ →
+# „Neues Dashboard von Grund auf“ → Titel „Heizung“ (URL: dashboard-heizung).
+# Dashboard öffnen → ✏️ → ⋮ → „Raw-Konfigurationseditor“ → alles markieren,
+# durch diesen Text ersetzen → Speichern.
+#
+# Auf der Übersicht verstellt Antippen nichts: Raum-Kacheln öffnen das Fenster
+# des Raums, alles andere öffnet nur die Detailansicht.
+title: Heizung
+views:
+  - title: Heizung
+    path: uebersicht
+    icon: mdi:radiator
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizung
+            heading_style: title
+            icon: mdi:radiator
+          - type: tile
+            entity: binary_sensor.heizung_jemand_da
+            name: Jemand da
+            icon: mdi:home-account
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.heizung_automatik
+            name: Automatik
+            icon: mdi:thermostat-auto
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set raeume = [
+                ['bad', 'Bad', 'climate.heizung_bad', 'sensor.thermometer_bad_temperatur'],
+                ['kueche', 'Küche', 'climate.heizung_kuche', 'sensor.thermometer_kueche_temperatur'],
+                ['wohnzimmer', 'Wohnzimmer', 'climate.heizung_wohnzimmer', 'sensor.wohnzimmer_temperatur'],
+                ['schlafzimmer', 'Schlafzimmer', 'climate.heizung_schlafzimmer', 'sensor.schlafzimmer_luftsensor_temperatur'],
+                ['kinderzimmer', 'Kinderzimmer', 'climate.heizung_kinderzimmer', 'sensor.thermometer_kinderzimmer_temperatur']
+              ] -%}
+              {%- for k, n, v, t in raeume %}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              {{ '\n' if not loop.first else '' }}- **{{ n }}** · {{ grad(ist) }} → {{ grad(ziel) }}<br>{{ modus }} · {{ heiz }}
+              {%- endfor %}
+      - type: grid
+        cards:
+          - type: heading
+            heading: Einstellen
+            heading_style: subtitle
+            icon: mdi:gesture-tap
+          - type: tile
+            entity: climate.heizung_bad
+            name: Bad
+            icon: mdi:shower
+            state_content: current_temperature
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/bad
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/bad
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: climate.heizung_kuche
+            name: Küche
+            icon: mdi:countertop
+            state_content: current_temperature
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/kueche
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/kueche
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: climate.heizung_wohnzimmer
+            name: Wohnzimmer
+            icon: mdi:sofa
+            state_content: current_temperature
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/wohnzimmer
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/wohnzimmer
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: climate.heizung_schlafzimmer
+            name: Schlafzimmer
+            icon: mdi:bed-king
+            state_content: current_temperature
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/schlafzimmer
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/schlafzimmer
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: climate.heizung_kinderzimmer
+            name: Kinderzimmer
+            icon: mdi:teddy-bear
+            state_content: current_temperature
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/kinderzimmer
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/kinderzimmer
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.heizung_automatik
+            name: Allgemein
+            icon: mdi:cog
+            hide_state: true
+            grid_options:
+              columns: 6
+            tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/allgemein
+            icon_tap_action:
+              action: navigate
+              navigation_path: /dashboard-heizung/allgemein
+            hold_action:
+              action: none
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+  - title: Bad
+    path: bad
+    icon: mdi:shower
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set k = 'bad' -%}
+              {%- set v = 'climate.heizung_bad' -%}
+              {%- set t = 'sensor.thermometer_bad_temperatur' -%}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              ## {{ grad(ist) }}
+              Ziel **{{ grad(ziel) }}** · {{ modus }}<br>{{ heiz }}
+          - type: heading
+            heading: Temperaturen
+            heading_style: subtitle
+            icon: mdi:thermometer
+          - type: tile
+            entity: input_number.heizung_bad_komfort
+            name: Wohlfühl
+            icon: mdi:white-balance-sunny
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_bad_absenk
+            name: Abgesenkt
+            icon: mdi:weather-night
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_bad_abwesend
+            name: Keiner da
+            icon: mdi:home-export-outline
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: '**Wohlfühl** gilt in der Heizzeit, wenn jemand zu Hause ist.<br>**Abgesenkt** gilt außerhalb der Heizzeit.<br>**Keiner da** gilt, wenn niemand zu Hause ist (über 1 km weg, nach 10 Minuten) – nie wärmer als Abgesenkt.'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizzeit
+            heading_style: subtitle
+            icon: mdi:calendar-clock
+          - type: tile
+            entity: schedule.heizung_bad
+            name: Heizzeiten
+            icon: mdi:calendar-clock
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: 'Zeiten ändern: oben auf **Heizzeiten** tippen → rechts oben ⚙️ → im Wochenplan Zeiten ziehen, neue anlegen oder löschen → **Aktualisieren**.'
+          - type: heading
+            heading: Von Hand
+            heading_style: subtitle
+            icon: mdi:hand-back-right
+          - type: tile
+            entity: climate.heizung_bad
+            name: Bad jetzt anders
+            icon: mdi:shower
+            state_content:
+              - current_temperature
+              - temperature
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Antippen und am Regler einstellen. Gilt 2 Stunden bzw. bis zur nächsten Heizzeit, danach wieder Automatik.
+  - title: Küche
+    path: kueche
+    icon: mdi:countertop
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set k = 'kueche' -%}
+              {%- set v = 'climate.heizung_kuche' -%}
+              {%- set t = 'sensor.thermometer_kueche_temperatur' -%}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              ## {{ grad(ist) }}
+              Ziel **{{ grad(ziel) }}** · {{ modus }}<br>{{ heiz }}
+          - type: heading
+            heading: Temperaturen
+            heading_style: subtitle
+            icon: mdi:thermometer
+          - type: tile
+            entity: input_number.heizung_kueche_komfort
+            name: Wohlfühl
+            icon: mdi:white-balance-sunny
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_kueche_absenk
+            name: Abgesenkt
+            icon: mdi:weather-night
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_kueche_abwesend
+            name: Keiner da
+            icon: mdi:home-export-outline
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: '**Wohlfühl** gilt in der Heizzeit, wenn jemand zu Hause ist.<br>**Abgesenkt** gilt außerhalb der Heizzeit.<br>**Keiner da** gilt, wenn niemand zu Hause ist (über 1 km weg, nach 10 Minuten) – nie wärmer als Abgesenkt.'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizzeit
+            heading_style: subtitle
+            icon: mdi:calendar-clock
+          - type: tile
+            entity: schedule.heizung_kueche
+            name: Heizzeiten
+            icon: mdi:calendar-clock
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: 'Zeiten ändern: oben auf **Heizzeiten** tippen → rechts oben ⚙️ → im Wochenplan Zeiten ziehen, neue anlegen oder löschen → **Aktualisieren**.'
+          - type: heading
+            heading: Von Hand
+            heading_style: subtitle
+            icon: mdi:hand-back-right
+          - type: tile
+            entity: climate.heizung_kuche
+            name: Küche jetzt anders
+            icon: mdi:countertop
+            state_content:
+              - current_temperature
+              - temperature
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Antippen und am Regler einstellen. Gilt 2 Stunden bzw. bis zur nächsten Heizzeit, danach wieder Automatik.
+  - title: Wohnzimmer
+    path: wohnzimmer
+    icon: mdi:sofa
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set k = 'wohnzimmer' -%}
+              {%- set v = 'climate.heizung_wohnzimmer' -%}
+              {%- set t = 'sensor.wohnzimmer_temperatur' -%}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              ## {{ grad(ist) }}
+              Ziel **{{ grad(ziel) }}** · {{ modus }}<br>{{ heiz }}
+          - type: heading
+            heading: Temperaturen
+            heading_style: subtitle
+            icon: mdi:thermometer
+          - type: tile
+            entity: input_number.heizung_wohnzimmer_komfort
+            name: Wohlfühl
+            icon: mdi:white-balance-sunny
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_wohnzimmer_absenk
+            name: Abgesenkt
+            icon: mdi:weather-night
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_wohnzimmer_abwesend
+            name: Keiner da
+            icon: mdi:home-export-outline
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: '**Wohlfühl** gilt in der Heizzeit, wenn jemand zu Hause ist.<br>**Abgesenkt** gilt außerhalb der Heizzeit.<br>**Keiner da** gilt, wenn niemand zu Hause ist (über 1 km weg, nach 10 Minuten) – nie wärmer als Abgesenkt.'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizzeit
+            heading_style: subtitle
+            icon: mdi:calendar-clock
+          - type: tile
+            entity: schedule.heizung_wohnzimmer
+            name: Heizzeiten
+            icon: mdi:calendar-clock
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: 'Zeiten ändern: oben auf **Heizzeiten** tippen → rechts oben ⚙️ → im Wochenplan Zeiten ziehen, neue anlegen oder löschen → **Aktualisieren**.'
+          - type: heading
+            heading: Von Hand
+            heading_style: subtitle
+            icon: mdi:hand-back-right
+          - type: tile
+            entity: climate.heizung_wohnzimmer
+            name: Wohnzimmer jetzt anders
+            icon: mdi:sofa
+            state_content:
+              - current_temperature
+              - temperature
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Antippen und am Regler einstellen. Gilt 2 Stunden bzw. bis zur nächsten Heizzeit, danach wieder Automatik.
+  - title: Schlafzimmer
+    path: schlafzimmer
+    icon: mdi:bed-king
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set k = 'schlafzimmer' -%}
+              {%- set v = 'climate.heizung_schlafzimmer' -%}
+              {%- set t = 'sensor.schlafzimmer_luftsensor_temperatur' -%}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              ## {{ grad(ist) }}
+              Ziel **{{ grad(ziel) }}** · {{ modus }}<br>{{ heiz }}
+          - type: heading
+            heading: Temperaturen
+            heading_style: subtitle
+            icon: mdi:thermometer
+          - type: tile
+            entity: input_number.heizung_schlafzimmer_komfort
+            name: Wohlfühl
+            icon: mdi:white-balance-sunny
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_schlafzimmer_absenk
+            name: Abgesenkt
+            icon: mdi:weather-night
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_schlafzimmer_abwesend
+            name: Keiner da
+            icon: mdi:home-export-outline
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: '**Wohlfühl** gilt in der Heizzeit, wenn jemand zu Hause ist.<br>**Abgesenkt** gilt außerhalb der Heizzeit.<br>**Keiner da** gilt, wenn niemand zu Hause ist (über 1 km weg, nach 10 Minuten) – nie wärmer als Abgesenkt.'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizzeit
+            heading_style: subtitle
+            icon: mdi:calendar-clock
+          - type: tile
+            entity: schedule.heizung_schlafzimmer
+            name: Heizzeiten
+            icon: mdi:calendar-clock
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: 'Zeiten ändern: oben auf **Heizzeiten** tippen → rechts oben ⚙️ → im Wochenplan Zeiten ziehen, neue anlegen oder löschen → **Aktualisieren**.'
+          - type: heading
+            heading: Von Hand
+            heading_style: subtitle
+            icon: mdi:hand-back-right
+          - type: tile
+            entity: climate.heizung_schlafzimmer
+            name: Schlafzimmer jetzt anders
+            icon: mdi:bed-king
+            state_content:
+              - current_temperature
+              - temperature
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Antippen und am Regler einstellen. Gilt 2 Stunden bzw. bis zur nächsten Heizzeit, danach wieder Automatik.
+  - title: Kinderzimmer
+    path: kinderzimmer
+    icon: mdi:teddy-bear
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: markdown
+            content: |
+              {%- macro grad(x) -%}
+              {%- if x is number -%}{%- set z = '%.1f' | format(x) -%}{{ (z[:-2] if z.endswith('.0') else z) | replace('.', ',') }} °C{%- else -%}–{%- endif -%}
+              {%- endmacro -%}
+              {%- macro uhr(x) -%}
+              {%- set d = as_local(as_datetime(x | string)) -%}
+              {%- set tage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] -%}
+              {%- if d.date() == now().date() -%}{{ d.strftime('%H:%M') }}
+              {%- elif d.date() == (now() + timedelta(days=1)).date() -%}morgen {{ d.strftime('%H:%M') }}
+              {%- else -%}{{ tage[d.weekday()] }} {{ d.strftime('%H:%M') }}{%- endif -%}
+              {%- endmacro -%}
+              {%- set vorheizen = (state_attr('input_datetime.heizung_vorheizen_bis', 'timestamp') | float(0)) > as_timestamp(now()) -%}
+              {%- set k = 'kinderzimmer' -%}
+              {%- set v = 'climate.heizung_kinderzimmer' -%}
+              {%- set t = 'sensor.thermometer_kinderzimmer_temperatur' -%}
+              {%- set ist = states(t) | float(none) -%}
+              {%- set ist = state_attr(v, 'current_temperature') if ist is none else ist -%}
+              {%- set ziel = state_attr(v, 'temperature') -%}
+              {%- set plan = 'schedule.heizung_' ~ k -%}
+              {%- set heizzeit = is_state(plan, 'on') -%}
+              {%- set da = (is_state('input_boolean.kinder_sind_da', 'on') or is_state('input_boolean.kinder_kommen', 'on')) if k == 'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da', 'on') -%}
+              {%- set naechst = state_attr(plan, 'next_event') -%}
+              {%- set wann = uhr(naechst) if naechst else '' -%}
+              {%- set heiz = ('Heizzeit bis ' ~ wann if wann else 'Heizzeit läuft') if heizzeit else ('Heizzeit ab ' ~ wann if wann else 'keine Heizzeit geplant') -%}
+              {%- set timer = 'timer.heizung_handbetrieb_' ~ k -%}
+              {%- set hand_bis = state_attr(timer, 'finishes_at') -%}
+              {%- set modus = 'Automatik ist aus' if is_state('input_boolean.heizung_automatik', 'off')
+                else 'Fenster offen – Ventil zu' if is_state('input_boolean.heizung_fenster_' ~ k, 'on')
+                else ('von Hand bis ' ~ uhr(hand_bis) if hand_bis else 'von Hand') if is_state(timer, 'active')
+                else 'Wohlfühl' if da and heizzeit
+                else 'Wohlfühl (Vorheizen)' if da and vorheizen
+                else 'Abgesenkt' if da
+                else ('Keine Kinder da' if k == 'kinderzimmer' else 'Keiner da') -%}
+              ## {{ grad(ist) }}
+              Ziel **{{ grad(ziel) }}** · {{ modus }}<br>{{ heiz }}
+          - type: tile
+            entity: input_boolean.kinder_sind_da
+            name: Kinder sind da
+            icon: mdi:account-child
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.kinder_kommen
+            name: Kinder kommen
+            icon: mdi:account-child-outline
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: heading
+            heading: Temperaturen
+            heading_style: subtitle
+            icon: mdi:thermometer
+          - type: tile
+            entity: input_number.heizung_kinderzimmer_komfort
+            name: Wohlfühl
+            icon: mdi:white-balance-sunny
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_kinderzimmer_absenk
+            name: Abgesenkt
+            icon: mdi:weather-night
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_number.heizung_kinderzimmer_abwesend
+            name: Keine Kinder da
+            icon: mdi:home-export-outline
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: '**Wohlfühl** gilt in der Heizzeit, wenn die Kinder da sind (oder kommen).<br>**Abgesenkt** gilt außerhalb der Heizzeit.<br>**Keine Kinder da** gilt, wenn die Kinder nicht da sind – nie wärmer als Abgesenkt.'
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heizzeit
+            heading_style: subtitle
+            icon: mdi:calendar-clock
+          - type: tile
+            entity: schedule.heizung_kinderzimmer
+            name: Heizzeiten
+            icon: mdi:calendar-clock
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: 'Zeiten ändern: oben auf **Heizzeiten** tippen → rechts oben ⚙️ → im Wochenplan Zeiten ziehen, neue anlegen oder löschen → **Aktualisieren**.'
+          - type: heading
+            heading: Von Hand
+            heading_style: subtitle
+            icon: mdi:hand-back-right
+          - type: tile
+            entity: climate.heizung_kinderzimmer
+            name: Kinderzimmer jetzt anders
+            icon: mdi:teddy-bear
+            state_content:
+              - current_temperature
+              - temperature
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Antippen und am Regler einstellen. Gilt 2 Stunden bzw. bis zur nächsten Heizzeit, danach wieder Automatik.
+  - title: Allgemein
+    path: allgemein
+    icon: mdi:cog
+    subview: true
+    back_path: /dashboard-heizung/uebersicht
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Automatik
+            heading_style: subtitle
+            icon: mdi:thermostat-auto
+          - type: tile
+            entity: input_boolean.heizung_automatik
+            name: Automatik
+            icon: mdi:thermostat-auto
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: binary_sensor.heizung_jemand_da
+            name: Jemand da
+            icon: mdi:home-account
+            grid_options:
+              columns: 6
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_boolean.heizung_raumthermometer
+            name: Raumthermometer-Ausgleich
+            icon: mdi:thermometer-check
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: tile
+            entity: input_datetime.heizung_vorheizen_bis
+            name: Vorheizen bis
+            icon: mdi:alarm
+            grid_options:
+              columns: 12
+            tap_action:
+              action: more-info
+            icon_tap_action:
+              action: more-info
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: heading
+            heading: Schnellheizen
+            heading_style: subtitle
+            icon: mdi:fire
+          - type: tile
+            entity: input_number.heizung_schnellheizen_ab
+            name: Schnellheizen ab
+            icon: mdi:fire
+            hide_state: true
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            grid_options:
+              columns: 12
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: markdown
+            content: Ist ein Raum um so viel zu kalt, geht das Ventil voll auf, bis der Raum fast am Ziel ist.

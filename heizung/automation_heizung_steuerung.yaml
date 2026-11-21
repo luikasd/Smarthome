@@ -1,0 +1,289 @@
+alias: 'Heizung: Steuerung'
+description: >-
+  Pro Raum gibt es ein Raum-Thermostat „Heizung …“ (Raumthermometer +
+  tado-Ventil, auch für Alexa). Automatik: In der Heizzeit oder beim Vorheizen
+  vor dem Wecker und wenn jemand da ist → Wohlfühltemperatur, sonst
+  Absenktemperatur; ist keiner da (außerhalb „Nähe“ = 1 km, nach 10 Minuten) →
+  „Keiner da“-Temperatur des Raums (input_number.heizung_<raum>_abwesend; gibt
+  es die nicht, gilt „Temperatur wenn keiner da“), nie wärmer als die
+  Absenktemperatur. Kinderzimmer nur mit „Kinder sind da“ oder „Kinder
+  kommen“. Ist der Raum um mindestens „Schnellheizen ab“ (Standard 1 °C) zu
+  kalt, geht das Ventil auf 30 °C (voll auf), bis der Raum 0,3 °C unter dem
+  Ziel ist. Sonst bekommt das Ventil Raum-Soll + Ausgleich (Ventil misst am
+  heißen Heizkörper, −2 bis +3 °C). Fenster offen → Ventil aus. Stellst du
+  selbst etwas ein (Alexa, Dashboard, am Ventil), gilt das 2 Stunden bzw. bis
+  zur nächsten Heizzeit.
+triggers:
+  - trigger: state
+    entity_id:
+      - schedule.heizung_bad
+      - schedule.heizung_kueche
+      - schedule.heizung_wohnzimmer
+      - schedule.heizung_schlafzimmer
+      - schedule.heizung_kinderzimmer
+    id: zeitplan
+  - trigger: state
+    entity_id: binary_sensor.heizung_jemand_da
+    id: anwesenheit
+  - trigger: state
+    entity_id: input_boolean.kinder_sind_da
+    id: kinder
+  - trigger: state
+    entity_id:
+      - input_boolean.heizung_fenster_bad
+      - input_boolean.heizung_fenster_kueche
+      - input_boolean.heizung_fenster_wohnzimmer
+      - input_boolean.heizung_fenster_schlafzimmer
+      - input_boolean.heizung_fenster_kinderzimmer
+    id: fenster
+  - trigger: state
+    entity_id:
+      - input_number.heizung_bad_komfort
+      - input_number.heizung_bad_absenk
+      - input_number.heizung_bad_abwesend
+      - input_number.heizung_kueche_komfort
+      - input_number.heizung_kueche_absenk
+      - input_number.heizung_kueche_abwesend
+      - input_number.heizung_wohnzimmer_komfort
+      - input_number.heizung_wohnzimmer_absenk
+      - input_number.heizung_wohnzimmer_abwesend
+      - input_number.heizung_schlafzimmer_komfort
+      - input_number.heizung_schlafzimmer_absenk
+      - input_number.heizung_schlafzimmer_abwesend
+      - input_number.heizung_kinderzimmer_komfort
+      - input_number.heizung_kinderzimmer_absenk
+      - input_number.heizung_kinderzimmer_abwesend
+      - input_number.heizung_abwesend
+    id: regler
+  - trigger: state
+    entity_id:
+      - input_boolean.heizung_automatik
+      - input_boolean.heizung_raumthermometer
+    id: schalter
+  - trigger: state
+    entity_id:
+      - timer.heizung_handbetrieb_bad
+      - timer.heizung_handbetrieb_kueche
+      - timer.heizung_handbetrieb_wohnzimmer
+      - timer.heizung_handbetrieb_schlafzimmer
+      - timer.heizung_handbetrieb_kinderzimmer
+    to: idle
+    id: handbetrieb_ende
+  - trigger: state
+    entity_id: input_datetime.heizung_vorheizen_bis
+    id: vorheizen
+  - trigger: time
+    at: input_datetime.heizung_vorheizen_bis
+    id: vorheizen_ende
+  - trigger: event
+    event_type: heizung_neu_berechnen
+    id: neu
+  - trigger: state
+    entity_id:
+      - climate.smart_radiator_thermostat_x_2
+      - climate.kuche_kuchen_heizung
+      - climate.smart_radiator_thermostat_x
+      - climate.schlafzimmer_schlafzimmer_heizung
+      - climate.smart_radiator_thermostat_x_3
+    from: unavailable
+    id: wieder_da
+  - trigger: time_pattern
+    minutes: /5
+    id: zyklus
+  - trigger: homeassistant
+    event: start
+    id: start
+  - trigger: state
+    entity_id:
+      - input_boolean.kinder_kommen
+      - input_number.heizung_schnellheizen_ab
+    id: regler
+conditions:
+  - condition: state
+    entity_id: input_boolean.heizung_automatik
+    state: 'on'
+actions:
+  - alias: >-
+      Nach einem Neustart: Fenster-Merker zurücksetzen (deren Zurücksetz-Ablauf
+      wurde unterbrochen)
+    if:
+      - condition: trigger
+        id: start
+    then:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.heizung_fenster_bad
+            - input_boolean.heizung_fenster_kueche
+            - input_boolean.heizung_fenster_wohnzimmer
+            - input_boolean.heizung_fenster_schlafzimmer
+            - input_boolean.heizung_fenster_kinderzimmer
+  - alias: Zeitplan-Wechsel beendet den Handbetrieb in diesem Raum
+    if:
+      - condition: trigger
+        id: zeitplan
+    then:
+      - action: timer.cancel
+        target:
+          entity_id: >-
+            {{ 'timer.heizung_handbetrieb_' ~
+            trigger.entity_id.split('heizung_')[1] }}
+        continue_on_error: true
+  - delay:
+      seconds: '{{ 20 if (trigger.id | default('''')) == ''wieder_da'' else 2 }}'
+  - repeat:
+      for_each: '{{ raeume }}'
+      sequence:
+        - variables:
+            r: '{{ repeat.item }}'
+            fenster: >-
+              {{ is_state('input_boolean.heizung_fenster_' ~ repeat.item.k,
+              'on') }}
+            hand: >-
+              {{ is_state('timer.heizung_handbetrieb_' ~ repeat.item.k,
+              'active') }}
+            da: >-
+              {{ (is_state('input_boolean.kinder_sind_da', 'on') or
+              is_state('input_boolean.kinder_kommen', 'on')) if repeat.item.k ==
+              'kinderzimmer' else is_state('binary_sensor.heizung_jemand_da',
+              'on') }}
+            vorheizen: >-
+              {{ (state_attr('input_datetime.heizung_vorheizen_bis',
+              'timestamp') | float(0)) > as_timestamp(now()) }}
+            komfort: >-
+              {{ states('input_number.heizung_' ~ repeat.item.k ~ '_komfort') |
+              float(20) }}
+            absenk: >-
+              {{ states('input_number.heizung_' ~ repeat.item.k ~ '_absenk') |
+              float(16) }}
+            weg: >-
+              {{ states('input_number.heizung_' ~ repeat.item.k ~ '_abwesend') |
+              float(states('input_number.heizung_abwesend') | float(16)) }}
+        - variables:
+            auto_soll: >-
+              {{ komfort if (da and (is_state('schedule.heizung_' ~ r.k, 'on')
+              or vorheizen)) else (absenk if da else [absenk, weg] | min) }}
+        - variables:
+            soll: >-
+              {{ (state_attr(r.v, 'temperature') | float(auto_soll)) if hand
+              else auto_soll }}
+            aus: '{{ hand and is_state(r.v, ''off'') }}'
+            raum: >-
+              {% set s = states[r.t] %}{% if s is not none and s.state |
+              is_number and 5 < (s.state | float) < 35 and (now() -
+              (s.last_reported or s.last_updated)).total_seconds() < 5400 %}{{
+              s.state | float }}{% else %}{{ none }}{% endif %}
+            trv: '{{ state_attr(r.c, ''current_temperature'') }}'
+        - variables:
+            ausgleich: >-
+              {% if is_state('input_boolean.heizung_raumthermometer', 'on') and
+              raum is number and trv is number and (trv - raum) | abs <= 8 %}{{
+              [[trv - raum, -2] | max, 3] | min }}{% else %}0{% endif %}
+        - variables:
+            ziel_normal: >-
+              {{ [[(((soll + ausgleich) * 2) | round(0)) / 2, 5] | max, 30] |
+              min }}
+            schwelle: '{{ states(''input_number.heizung_schnellheizen_ab'') | float(1) }}'
+            ges_alt: >-
+              {% set raw = states('input_text.heizung_gesendet') %}{% set d =
+              (raw | from_json) if raw.startswith('{') else {} %}{{ d.get(r.k,
+              0) | float(0) }}
+        - alias: >-
+            Schnellheizen: Raum deutlich zu kalt → Ventil voll auf (30 °C), bis
+            er fast am Ziel ist
+          variables:
+            ziel: >-
+              {{ 30 if (raum is number and not aus and soll > 10 and ((soll -
+              raum) >= schwelle or (ges_alt >= 29.5 and (soll - raum) > 0.3)))
+              else ziel_normal }}
+        - alias: Raum-Thermostat auf Automatik-Sollwert (nicht im Handbetrieb)
+          if:
+            - condition: template
+              value_template: >-
+                {{ not hand and states(r.v) not in ['unavailable','unknown'] and
+                (not is_state(r.v, 'heat') or ((state_attr(r.v, 'temperature') |
+                float(0)) - auto_soll) | abs >= 0.1) }}
+          then:
+            - action: climate.set_temperature
+              target:
+                entity_id: '{{ r.v }}'
+              data:
+                temperature: '{{ auto_soll }}'
+                hvac_mode: heat
+              continue_on_error: true
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: '{{ states(r.c) in [''unavailable'', ''unknown''] }}'
+              sequence: []
+            - conditions:
+                - condition: template
+                  value_template: '{{ fenster or aus }}'
+              sequence:
+                - if:
+                    - condition: template
+                      value_template: '{{ not is_state(r.c, ''off'') }}'
+                  then:
+                    - action: script.turn_on
+                      target:
+                        entity_id: script.heizung_ventil_setzen
+                      data:
+                        variables:
+                          ventil: '{{ r.c }}'
+                          temperatur: 0
+                          modus: 'off'
+          default:
+            - if:
+                - condition: template
+                  value_template: >-
+                    {{ not is_state(r.c, 'heat') or ((state_attr(r.c,
+                    'temperature') | float(0)) - ziel) | abs >= 0.5 }}
+              then:
+                - action: input_text.set_value
+                  target:
+                    entity_id: input_text.heizung_gesendet
+                  data:
+                    value: >-
+                      {% set raw = states('input_text.heizung_gesendet') %}{%
+                      set d = (raw | from_json) if raw.startswith('{') else {}
+                      %}{{ dict(d, **{r.k: ziel}) | to_json }}
+                - action: script.turn_on
+                  target:
+                    entity_id: script.heizung_ventil_setzen
+                  data:
+                    variables:
+                      ventil: '{{ r.c }}'
+                      temperatur: '{{ ziel }}'
+                      modus: heat
+mode: queued
+max: 3
+max_exceeded: silent
+variables:
+  raeume:
+    - k: bad
+      'n': Bad
+      c: climate.smart_radiator_thermostat_x_2
+      v: climate.heizung_bad
+      t: sensor.thermometer_bad_temperatur
+    - k: kueche
+      'n': Küche
+      c: climate.kuche_kuchen_heizung
+      v: climate.heizung_kuche
+      t: sensor.thermometer_kueche_temperatur
+    - k: wohnzimmer
+      'n': Wohnzimmer
+      c: climate.smart_radiator_thermostat_x
+      v: climate.heizung_wohnzimmer
+      t: sensor.wohnzimmer_temperatur
+    - k: schlafzimmer
+      'n': Schlafzimmer
+      c: climate.schlafzimmer_schlafzimmer_heizung
+      v: climate.heizung_schlafzimmer
+      t: sensor.schlafzimmer_luftsensor_temperatur
+    - k: kinderzimmer
+      'n': Kinderzimmer
+      c: climate.smart_radiator_thermostat_x_3
+      v: climate.heizung_kinderzimmer
+      t: sensor.thermometer_kinderzimmer_temperatur
+trace:
+  stored_traces: 20
