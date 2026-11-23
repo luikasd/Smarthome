@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────────────────────────
+# TEIL 1: Neue Unteransicht "Kamera Keller"
+# Dashboard → ✏️ → ⋮ → Raw-Konfigurationseditor → ganz nach unten
+# scrollen und diesen Block als letzten Eintrag unter "views:" einfügen
+# (gleiche Einrückung wie "- title: Heizung allgemein").
+# ─────────────────────────────────────────────────────────────────────
+  - title: Kamera Keller
+    path: kamera-keller
+    icon: mdi:cctv
+    subview: true
+    back_path: /lovelace/keller # TODO: Pfad deiner Keller-Ansicht anpassen
+    type: sections
+    max_columns: 1
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Kamera Keller
+            icon: mdi:cctv
+            heading_style: title
+          - type: picture-entity
+            entity: camera.kamera_keller # TODO: entity_id anpassen
+            camera_view: live
+            show_name: false
+            show_state: false
+            # Antippen macht nichts, damit kein zweiter Stream startet.
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            grid_options:
+              columns: full
+            card_mod:
+              style: 'ha-card { border-radius: 14px; overflow: hidden; }'
+          - type: button
+            name: Links
+            icon: mdi:arrow-left-bold
+            show_state: false
+            tap_action:
+              action: perform-action
+              perform_action: script.kamera_keller_schwenken
+              data:
+                richtung: links
+            grid_options:
+              columns: 4
+              rows: 2
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: button
+            name: Geradeaus
+            icon: mdi:crosshairs
+            show_state: false
+            tap_action:
+              action: perform-action
+              perform_action: script.kamera_keller_schwenken
+              data:
+                richtung: mitte
+              confirmation:
+                text: >-
+                  Kamera kalibrieren? Sie dreht sich einmal ganz herum und
+                  schaut danach geradeaus (dauert ca. 30–60 Sekunden).
+            grid_options:
+              columns: 4
+              rows: 2
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+          - type: button
+            name: Rechts
+            icon: mdi:arrow-right-bold
+            show_state: false
+            tap_action:
+              action: perform-action
+              perform_action: script.kamera_keller_schwenken
+              data:
+                richtung: rechts
+            grid_options:
+              columns: 4
+              rows: 2
+            card_mod:
+              style: 'ha-card { border-radius: 14px; }'
+
+# ─────────────────────────────────────────────────────────────────────
+# TEIL 2: Bestehende Karte "Kamera Keller" in deiner Keller-Ansicht
+# Karte bearbeiten → Code-Editor → die vorhandene "tap_action:"
+# (zurzeit "action: more-info") durch das hier ersetzen:
+# ─────────────────────────────────────────────────────────────────────
+# tap_action:
+#   action: navigate
+#   navigation_path: /lovelace/kamera-keller

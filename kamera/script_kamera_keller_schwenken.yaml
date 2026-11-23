@@ -1,0 +1,66 @@
+# Einfügen: Einstellungen → Automationen & Szenen → Skripte → Skript erstellen
+# → ⋮ → In YAML bearbeiten → alles ab "alias:" einfügen → Speichern.
+# Die Skript-ID muss "kamera_keller_schwenken" sein (sonst finden die
+# Dashboard-Buttons es nicht) → wird zu script.kamera_keller_schwenken.
+#
+# Alternativ in scripts.yaml: den ganzen Block inkl. der ersten Zeile
+# "kamera_keller_schwenken:" einfügen.
+
+kamera_keller_schwenken:
+  alias: "Kamera Keller: Schwenken"
+  description: >-
+    Dreht die Tuya-Kamera im Keller ein Stück nach links oder rechts und
+    stoppt sie wieder. "mitte" startet die Kalibrierung, danach schaut die
+    Kamera wieder geradeaus.
+  icon: mdi:cctv
+  # queued: schnelles Mehrfach-Tippen = mehrere Schritte nacheinander,
+  # statt dass ein Stopp-Befehl verloren geht.
+  mode: queued
+  max: 5
+  max_exceeded: silent
+  fields:
+    richtung:
+      name: Richtung
+      required: true
+      selector:
+        select:
+          options:
+            - label: Links
+              value: links
+            - label: Rechts
+              value: rechts
+            - label: Geradeaus (Kalibrierung)
+              value: mitte
+  variables:
+    # Wie lange sich die Kamera pro Tipp dreht. Größer = weiter pro Tipp.
+    schritt_sekunden: 0.6
+    # TODO: entity_id anpassen (Buttons kommen aus der Integration "Tuya Local")
+    taste_links: button.kamera_keller_ptz_left
+    taste_rechts: button.kamera_keller_ptz_right
+    taste_stopp: button.kamera_keller_ptz_stop
+    taste_mitte: button.kamera_keller_ptz_calibration
+    r: "{{ richtung | default('') | string | lower }}"
+  sequence:
+    - choose:
+        - alias: Geradeaus (Kalibrierung)
+          conditions:
+            - condition: template
+              value_template: "{{ r == 'mitte' }}"
+          sequence:
+            - action: button.press
+              target:
+                entity_id: "{{ taste_mitte }}"
+        - alias: Ein Stück nach links oder rechts
+          conditions:
+            - condition: template
+              value_template: "{{ r in ['links', 'rechts'] }}"
+          sequence:
+            - action: button.press
+              target:
+                entity_id: "{{ taste_links if r == 'links' else taste_rechts }}"
+            # Tuya dreht so lange, bis "Stopp" kommt → kurz warten, dann stoppen.
+            - delay:
+                milliseconds: "{{ (schritt_sekunden | float(0.6) * 1000) | int(600) }}"
+            - action: button.press
+              target:
+                entity_id: "{{ taste_stopp }}"
